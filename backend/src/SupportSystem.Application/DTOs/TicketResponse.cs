@@ -1,3 +1,5 @@
+using System.Coollections.Generic;
+
 namespace SupportSystem.Application.DTOs;
 
 // Estrutura enviada aos consumidores com os dados do ticket.
@@ -41,4 +43,7 @@ public record class TicketResponse
 
     // Feedback associado ao ticket.
     public TicketFeedbackDto? Feedback { get; init; }
+
+    // Lista de sugestões contextuais vindas da IA e da base de conhecimento.
+    public IReadOnlyList<TicketSuggestionDto> Suggestions { get; init; } = Array.Empty<TicketSuggestionDto>();
 }

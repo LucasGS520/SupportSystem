@@ -107,6 +107,7 @@ function renderTicketsList(tickets) {
         card.className = "ticket-card";
 
         const feedback = formatFeedback(t.feedback);
+        const suggestionsSection = formatSuggestions(t.suggestions);
 
         card.innerHTML = `
             <header>
@@ -131,9 +132,11 @@ function renderTicketsList(tickets) {
             </p>
 
             <p class="ticket-ai">
-                💡 <strong>Sugestão da IA:</strong>
+                💡 <strong>Sugestão em destaque:</strong>
                 ${t.sugestaoIa || "Sugestão automática de solução para o chamado."}
             </p>
+
+            ${suggestionsSection}
 
             ${feedback}
 
@@ -232,6 +235,40 @@ function formatFeedback(feedback) {
     `;
 }
 
+// Monta a lista de sugestões combinando IA e base de conhecimento
+function formatSuggestions(suggestions) {
+    if (!Array.isArray(suggestions) || suggestions.length === 0) {
+        return "";
+    }
+
+    const items = suggestions
+        .map((suggestion) => {
+            const fonte = suggestion.fonte || suggestion.Fonte || "Base de conhecimento";
+            const titulo = suggestion.titulo || suggestion.Titulo || "Sugestão";
+            const descricao = suggestion.descricao || suggestion.Descricao || "";
+
+            return `
+                <li>
+                    <span class="suggestion-source">${fonte}</span>
+                    <div>
+                        <strong>${titulo}</strong>
+                        <p>${descricao}</p>
+                    </div>
+                </li>
+            `;
+        })
+        .join("");
+
+    return `
+        <section class="ticket-suggestions">
+            <h5>📚 Sugestões relacionadas</h5>
+            <ul>
+                ${items}
+            </ul>
+        </section>
+    `;
+}
+
 // Chama a API /api/tickets e alimenta a tela
 async function loadTicketsFromApi() {
     try {
@@ -246,6 +283,15 @@ async function loadTicketsFromApi() {
         // Normaliza chave -> minúsculo (caso o back use PascalCase)
         const tickets = data.map((t) => {
             const feedback = t.feedback ?? t.Feedback ?? null;
+
+            const rawSuggestions = t.suggestions ?? t.Suggestions ?? [];
+            const normalizedSuggestions = Array.isArray(rawSuggestions)
+                ? rawSuggestions.map((suggestion) => ({
+                      titulo: suggestion.titulo ?? suggestion.Titulo ?? "Sugestão",
+                      descricao: suggestion.descricao ?? suggestion.Descricao ?? "",
+                      fonte: suggestion.fonte ?? suggestion.Fonte ?? "Base de conhecimento"
+                  }))
+                : [];
 
             const normalizedFeedback = feedback
                 ? {
@@ -268,7 +314,8 @@ async function loadTicketsFromApi() {
                 abertoEm: t.abertoEm ?? t.AbertoEm ?? null,
                 abertoHa: t.abertoHa ?? t.AbertoHa,
                 sugestaoIa: t.sugestaoIa ?? t.SugestaoIa,
-                feedback: normalizedFeedback
+                feedback: normalizedFeedback,
+                suggestions: normalizedSuggestions
             };
         });
 
@@ -298,7 +345,21 @@ async function loadTicketsFromApi() {
                     nota: 5,
                     comentario: "Atendimento rápido e cordial.",
                     registradoEm: new Date().toISOString()
-                }
+                },
+                suggestions: [
+                    {
+                        titulo: "Sugestão da IA",
+                        descricao:
+                            "Verifique sincronização de credenciais, status do servidor VPN e políticas de firewall.",
+                        fonte: "Assistente virtual"
+                    },
+                    {
+                        titulo: "Erro de VPN após atualização de credenciais",
+                        descricao:
+                            "Revisar políticas de acesso no AD, confirmar sincronização de credenciais e reiniciar o serviço VPN.",
+                        fonte: "Base de conhecimento"
+                    }
+                ]
             },
             {
                 id: 1019,
@@ -313,7 +374,15 @@ async function loadTicketsFromApi() {
                 abertoHa: "Hoje, 08:12",
                 sugestaoIa:
                     "Conferir uso de CPU e memória no servidor, além de índices do banco.",
-                feedback: null
+                feedback: null,
+                suggestions: [
+                    {
+                        titulo: "Lentidão em aplicação web",
+                        descricao:
+                            "Validar utilização de recursos no servidor, analisar métricas de banco e aplicar índices recomendados.",
+                        fonte: "Base de conhecimento"
+                    }
+                ]
             }
         ];
 

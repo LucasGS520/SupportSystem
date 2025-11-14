@@ -35,6 +35,9 @@ public class Ticket
     // Data/hora de abertura registrada em UTC.
     public DateTime AbertoEm { get; set; } = DateTime.UtcNow;
 
+    // Feedback registrado pelo solicitante após a resolução.
+    public TicketFeedback? Feedback { get; set; }
+
     // Sugestão de resolução gerada pela IA, quando existir.
     public string? SugestaoIa { get; set; }
 }

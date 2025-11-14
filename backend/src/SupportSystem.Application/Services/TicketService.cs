@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Extensions.Logging;
 using SupportSystem.Application.Abstractions;
 using SupportSystem.Application.DTOs;
@@ -12,16 +14,22 @@ namespace SupportSystem.Application.Services;
 public class TicketService : ITicketService
 {
     private readonly ITicketRepository _ticketRepository;
+    private readonly IKnowledgeBaseRepository _knowledgeBaseRepository;
+    private readonly IAIService _aiService;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ILogger<TicketService> _logger;
 
     // Cria o serviço recebendo repositório, provedor de data e logger.
     public TicketService(
         ITicketRepository ticketRepository,
+        IKnowledgeBaseRepository knowledgeBaseRepository,
+        IAIService aiService,
         IDateTimeProvider dateTimeProvider,
         ILogger<TicketService> logger)
     {
         _ticketRepository = ticketRepository;
+        _knowledgeBaseRepository = knowledgeBaseRepository;
+        _aiService = aiService;
         _dateTimeProvider = dateTimeProvider;
         _logger = logger;
     }
@@ -30,14 +38,19 @@ public class TicketService : ITicketService
     public async Task<IReadOnlyList<TicketResponse>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         var tickets = await _ticketRepository.GetAllAsync(cancellationToken);
-        return tickets.Select(MapToResponse).ToList();
+        var projections = await Task.WhenAll(
+            tickets.Select(ticket => MapToResponseWithSuggestionsAsync(ticket, cancellationToken)));
+
+        return projections.ToList();
     }
 
     // Consulta um ticket específico pelo identificador.
     public async Task<TicketResponse?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         var ticket = await _ticketRepository.GetByIdAsync(id, cancellationToken);
-        return ticket is null ? null : MapToResponse(ticket);
+        return ticket is null
+            ? null
+            : await MapToResponseWithSuggestionsAsync(ticket, cancellationToken);
     }
 
     // Cria um ticket novo e devolve a projeção pronta para API.
@@ -61,7 +74,7 @@ public class TicketService : ITicketService
         var created = await _ticketRepository.AddAsync(ticket, cancellationToken);
         _logger.LogInformation("Ticket {TicketId} criado com sucesso", created.Id);
 
-        return MapToResponse(created);
+        return await MapToResponseWithSuggestionsAsync(created, cancellationToken);
     }
 
     // Atualiza campos de um ticket existente.
@@ -123,6 +136,82 @@ public class TicketService : ITicketService
         _logger.LogInformation("Ticket {TicketId} removido", ticket.Id);
 
         return true;
+    }
+
+    // Converte a entidade em DTO e agrega sugestões oriundas da IA e da base de conhecimento.
+    private async Task<TicketResponse> MapToResponseWithSuggestionsAsync(
+        Ticket ticket,
+        CancellationToken cancellationToken)
+    {
+        var response = MapToResponse(ticket);
+        var suggestions = await BuildSuggestionsAsync(ticket, cancellationToken);
+
+        var sugestaoPrimaria = response.SugestaoIa;
+        if (string.IsNullOrWhiteSpace(sugestaoPrimaria))
+        {
+            // Define uma sugestão principal para compatibilidade com a UI legada.
+            sugestaoPrimaria = suggestions.FirstOrDefault(s => s.Fonte == "Assistente virtual")?.Descricao
+                ?? suggestions.FirstOrDefault()?.Descricao
+                ?? response.SugestaoIa;
+        }
+
+        return response with
+        {
+            SugestaoIa = sugestaoPrimaria,
+            Suggestions = suggestions
+        };
+    }
+
+    // Monta a lista de sugestões que será exibida para o ticket atual.
+    private async Task<IReadOnlyList<TicketSuggestionDto>> BuildSuggestionsAsync(
+        Ticket ticket,
+        CancellationToken cancellationToken)
+    {
+        var suggestions = new List<TicketSuggestionDto>();
+
+        var knowledgeArticles = await _knowledgeBaseRepository.BuscarRelevantesAsync(
+            ticket.Titulo,
+            ticket.Categoria,
+            5,
+            cancellationToken);
+
+        foreach (var article in knowledgeArticles)
+        {
+            suggestions.Add(new TicketSuggestionDto
+            {
+                Titulo = article.Titulo,
+                Descricao = BuildResumo(article.Conteudo),
+                Fonte = "Base de conhecimento"
+            });
+        }
+
+        var aiSuggestion = await _aiService.GerarSugestaoAsync(ticket, cancellationToken);
+        if (!string.IsNullOrWhiteSpace(aiSuggestion))
+        {
+            // Insere a resposta da IA no topo para destacar recomendações dinâmicas.
+            suggestions.Insert(0, new TicketSuggestionDto
+            {
+                Titulo = "Sugestão da IA",
+                Descricao = aiSuggestion!,
+                Fonte = "Assistente virtual"
+            });
+        }
+
+        return suggestions;
+    }
+
+    // Garante que o conteúdo exibido na interface seja curto e de leitura rápida.
+    private static string BuildResumo(string conteudo)
+    {
+        if (string.IsNullOrWhiteSpace(conteudo))
+        {
+            return string.Empty;
+        }
+
+        const int limite = 320;
+        return conteudo.Length <= limite
+            ? conteudo
+            : string.Concat(conteudo.AsSpan(0, limite).TrimEnd(), "...");
     }
 
     // Converte a entidade em DTO pronto para uso na camada de apresentação.

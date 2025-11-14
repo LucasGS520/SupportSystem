@@ -33,6 +33,7 @@ public static class DependencyInjection
         // Repositório e provedor de data/hora expostos para a aplicação.
         services.AddScoped<ITicketRepository, TicketRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IKnowledgeBaseRepository, KnowledgeBaseRepository>();
         services.AddScoped<IDateTimeProvider, SystemDateTimeProvider>();
 
         return services;
