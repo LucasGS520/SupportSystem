@@ -1,0 +1,19 @@
+@SupportSystem.Api_HostAddress = https://localhost:7191
+
+### Lista todos os tickets
+GET {{SupportSystem.Api_HostAddress}}/api/tickets
+Accept: application/json
+
+### Cria um novo ticket
+POST {{SupportSystem.Api_HostAddress}}/api/tickets
+Content-Type: application/json
+
+{
+  "titulo": "Erro de autenticação no portal",
+  "prioridade": 3,
+  "status": 2,
+  "solicitante": "Suporte N2",
+  "sugestaoIa": "Checar sincronização do AD Connect e tokens expirados."
+}
+
+###

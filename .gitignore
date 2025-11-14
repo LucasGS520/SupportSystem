@@ -1,0 +1,140 @@
+# ------------------------------------------------------------
+# .gitignore para solução ASP.NET Core + SQL Server + Frontend
+# Cobre Visual Studio, VS Code, .NET, testes, logs e artefatos web
+# ------------------------------------------------------------
+
+# Raiz do repositório
+*.log
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+*.orig
+*.rej
+*.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Pastas comuns de build/artefatos
+bin/
+obj/
+Debug/
+Release/
+out/
+build/
+dist/
+publish/
+artifacts/
+
+# Testes e cobertura
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+coverage/
+coverage-report/
+*.lcov
+
+# NuGet / pacotes / artefatos
+*.nupkg
+*.snupkg
+packages/
+# Para projetos antigos; manter restore automático
+project.lock.json
+project.fragment.lock.json
+
+# Rider / ReSharper / IDEs
+.idea/
+*.sln.iml
+_ReSharper*/
+*.ReSharper*/
+*.DotSettings.user
+
+# Visual Studio / VS Code
+.vs/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+# Arquivos de usuário do Visual Studio
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# ASP.NET / IIS
+*.vspscc
+*_i.c
+*_p.c
+*_h.h
+*.aps
+AppPackages/
+App_Data/
+
+# Publicação / temporários do Web Deploy
+*.pubxml.user
+PublishProfiles/*.pubxml.user
+PublishScripts/
+
+# Entity Framework / Banco local
+# Atenção: Migrations/ deve ser commitado
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+*.mdf
+*.ldf
+
+# Logs de app
+logs/
+log/
+*.pid
+*.seed
+
+# Arquivos de ambiente e segredos
+.env
+.env.*
+secrets.json
+
+# Chatmodes github
+.github
+
+# Node/Frontend (caso futuramente use bundlers)
+node_modules/
+.npm/
+.npmrc
+.yarn/
+.pnp.cjs
+.pnp.loader.mjs
+.next/
+.nuxt/
+.svelte-kit/
+
+# Imagens geradas / cache
+*.png.cache
+*.jpg.cache
+.cache/
+
+# Sistemas operacionais
+Icon?
+._*
+
+# Ferramentas diversas
+*.opendb
+*.tss
+*.coverlet.json
+
+# Arquivos temporários de merge/patch
+*.patch
+*.diff
+
+# Notas:
+# - appsettings.json deve ser commitado; appsettings.Development.json pode conter segredos.
+#   Se preferir evitar, mantenha desversionado e use User Secrets/variáveis de ambiente.
+# - EF Core Migrations devem ser versionadas (não ignore a pasta Migrations/).
