@@ -13,4 +13,10 @@ public interface IUserRepository
 
     // Insere um novo usuário no repositório.
     Task<User> AddAsync(User user, CancellationToken cancellationToken = default);
+
+    // Atualiza os dados do usuário existente.
+    Task UpdateAsync(User user, CancellationToken cancellationToken = default);
+
+    // Remove um usuário e suas credenciais.
+    Task DeleteAsync(User user, CancellationToken cancellationToken = default);
 }

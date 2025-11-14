@@ -34,4 +34,7 @@ public record class UpdateTicketRequest
 
     // Feedback atualizado pelo usuário após conclusão do atendimento.
     public TicketFeedbackDto? Feedback { get; init; }
+
+    // Define o consentimento atual para uso dos dados do ticket.
+    public bool? ConsentimentoDados { get; init; }
 }

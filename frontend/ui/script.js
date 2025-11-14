@@ -45,6 +45,8 @@ function setupModal() {
     const modal = document.getElementById("modalNovoChamado");
     const btnFechar = document.getElementById("btnFecharModal");
     const btnCancelar = document.getElementById("btnCancelarModal");
+    const consentCheckbox = document.getElementById("ticketConsent");
+    const submitButton = document.getElementById("btnCriarChamado");
 
     const closeModal = () => modal.classList.remove("active");
     const openModal = () => modal.classList.add("active");
@@ -60,6 +62,93 @@ function setupModal() {
         modal.addEventListener("click", (e) => {
             if (e.target === modal) closeModal();
         });
+    }
+
+    if (consentCheckbox && submitButton) {
+        // Impede envio enquanto o consentimento não estiver marcado.
+        const updateButtonState = () => {
+            submitButton.disabled = !consentCheckbox.checked;
+        };
+
+        consentCheckbox.addEventListener("change", updateButtonState);
+        updateButtonState();
+    }
+}
+
+// Configura controles da área de privacidade (exportação, exclusão e status).
+function setupPrivacyControls() {
+    const consentCheckbox = document.getElementById("ticketConsent");
+    const consentStatus = document.getElementById("privacyConsentStatus");
+    const exportButton = document.getElementById("btnExportarDados");
+    const deleteButton = document.getElementById("btnExcluirDados");
+
+    if (consentCheckbox && consentStatus) {
+        const syncStatus = () => {
+            const ativo = consentCheckbox.checked;
+            consentStatus.textContent = ativo ? "Ativo" : "Revogado";
+            consentStatus.classList.toggle("info", ativo);
+            consentStatus.classList.toggle("danger", !ativo);
+        };
+
+        consentCheckbox.addEventListener("change", syncStatus);
+        syncStatus();
+    }
+
+    if (exportButton) {
+        exportButton.addEventListener("click", async () => {
+            await exportUserData();
+        });
+    }
+
+    if (deleteButton) {
+        deleteButton.addEventListener("click", async () => {
+            const confirmacao = window.confirm(
+                "Tem certeza que deseja excluir todos os dados pessoais? Esta ação não pode ser desfeita."
+            );
+
+            if (!confirmacao) {
+                return;
+            }
+
+            await deleteUserData();
+        });
+    }
+}
+
+// Realiza chamada para exportar dados pessoais do usuário autenticado.
+async function exportUserData() {
+    try {
+        const response = await fetch("/api/privacy/export", { method: "GET" });
+        if (!response.ok) {
+            throw new Error(`Falha ao exportar (HTTP ${response.status})`);
+        }
+
+        const data = await response.json();
+        console.log("Exportação de dados concluída:", data);
+        alert("Exportação concluída! Confira o console para visualizar o JSON retornado.");
+    } catch (error) {
+        console.error("Erro ao exportar dados pessoais:", error);
+        alert("Não foi possível exportar os dados no momento. Tente novamente mais tarde.");
+    }
+}
+
+// Dispara a exclusão definitiva dos dados pessoais do usuário.
+async function deleteUserData() {
+    try {
+        const response = await fetch("/api/privacy/forget-me", { method: "DELETE" });
+        if (response.status === 404) {
+            alert("Nenhum dado para excluir foi localizado.");
+            return;
+        }
+
+        if (!response.ok) {
+            throw new Error(`Falha ao excluir (HTTP ${response.status})`);
+        }
+
+        alert("Dados pessoais excluídos com sucesso. Faça login novamente para continuar.");
+    } catch (error) {
+        console.error("Erro ao excluir dados pessoais:", error);
+        alert("Não foi possível excluir os dados agora. Verifique sua conexão ou tente mais tarde.");
     }
 }
 
@@ -315,12 +404,14 @@ async function loadTicketsFromApi() {
                 abertoHa: t.abertoHa ?? t.AbertoHa,
                 sugestaoIa: t.sugestaoIa ?? t.SugestaoIa,
                 feedback: normalizedFeedback,
-                suggestions: normalizedSuggestions
+                suggestions: normalizedSuggestions,
+                consentimentoDados: t.consentimentoDados ?? t.ConsentimentoDados ?? false
             };
         });
 
         renderDashboardTickets(tickets);
         renderTicketsList(tickets);
+        updateConsentStatusFromTickets(tickets);
 
         console.log("Chamados carregados da API:", tickets);
     } catch (error) {
@@ -388,12 +479,27 @@ async function loadTicketsFromApi() {
 
         renderDashboardTickets(fallbackTickets);
         renderTicketsList(fallbackTickets);
+        updateConsentStatusFromTickets(fallbackTickets);
     }
+}
+
+// Atualiza o rótulo de consentimento com base nos tickets retornados pela API.
+function updateConsentStatusFromTickets(tickets) {
+    const consentStatus = document.getElementById("privacyConsentStatus");
+    if (!consentStatus || !Array.isArray(tickets)) {
+        return;
+    }
+
+    const hasConsent = tickets.some((ticket) => ticket.consentimentoDados);
+    consentStatus.textContent = hasConsent ? "Ativo" : "Revogado";
+    consentStatus.classList.toggle("info", hasConsent);
+    consentStatus.classList.toggle("danger", !hasConsent);
 }
 
 // Inicialização geral
 document.addEventListener("DOMContentLoaded", () => {
     setupNavigation();
     setupModal();
+    setupPrivacyControls();
     loadTicketsFromApi();
 });

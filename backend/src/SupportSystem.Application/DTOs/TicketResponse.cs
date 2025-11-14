@@ -1,3 +1,4 @@
+using System;
 using System.Coollections.Generic;
 
 namespace SupportSystem.Application.DTOs;
@@ -46,4 +47,7 @@ public record class TicketResponse
 
     // Lista de sugestões contextuais vindas da IA e da base de conhecimento.
     public IReadOnlyList<TicketSuggestionDto> Suggestions { get; init; } = Array.Empty<TicketSuggestionDto>();
+
+    // Indica se os dados apresentados contam com consentimento válido.
+    public bool ConsentimentoDados { get; init; }
 }

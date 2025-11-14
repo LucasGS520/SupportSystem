@@ -401,6 +401,12 @@ textarea.field {
     transform: translateY(-1px);
 }
 
+.btn[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
 .btn-icon {
     border: none;
     background: transparent;
@@ -578,6 +584,50 @@ textarea.field {
     align-items: center;
     font-size: 12px;
     margin-top: 6px;
+}
+
+/* Cartão de privacidade e consentimento */
+.privacy-card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.privacy-card p {
+    margin: 0;
+    font-size: 12px;
+    color: var(--text-soft);
+}
+
+.privacy-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.privacy-actions .btn {
+    flex: 1;
+    min-width: 140px;
+}
+
+.consent-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--text-soft);
+}
+
+.consent-label input {
+    margin-top: 2px;
+}
+
+.privacy-hint {
+    display: block;
+    margin-top: 4px;
+    font-size: 11px;
+    color: var(--text-soft);
 }
 
 /* BOTÃO FLUTUANTE */

@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Mvc;
 using SupportSystem.Application.DTOs;
 using SupportSystem.Application.Interfaces;
@@ -45,12 +46,21 @@ public class TicketsController : ControllerBase
     // Cria um novo ticket a partir do payload enviado.
     [HttpPost]
     [ProducesResponseType(typeof(TicketResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<TicketResponse>> CreateTicket(
         [FromBody] CreateTicketRequest request,
         CancellationToken cancellationToken)
     {
-        var created = await _ticketService.CreateAsync(request, cancellationToken);
-        return CreatedAtAction(nameof(GetTicket), new { id = created.Id }, created);
+        try
+        {
+            var created = await _ticketService.CreateAsync(request, cancellationToken);
+            return CreatedAtAction(nameof(GetTicket), new { id = created.Id }, created);
+        }
+        catch (InvalidOperationException ex)
+        {
+            // Retorna 400 quando não há consentimento válido para registrar o ticket.
+            return BadRequest(new { mensagem = ex.Message });
+        }
     }
 
     // Atualiza os dados de um ticket existente.

@@ -1,3 +1,4 @@
+using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -34,6 +35,12 @@ public class UserService : IUserService
     // Cria um usuário novo após validar e-mail e aplicar hash à senha.
     public async Task<AuthResult> RegisterAsync(RegisterUserRequest request, CancellationToken cancellationToken = default)
     {
+        if (!request.ConsentimentoDados)
+        {
+            // Bloqueia cadastro sem consentimento explícito para aderir à LGPD.
+            return new AuthResult(false, null, "Consentimento é obrigatório para criar a conta.");
+        }
+
         var normalizedEmail = NormalizeEmail(request.Email);
         var existingUser = await _userRepository.GetByEmailAsync(normalizedEmail, cancellationToken);
         if (existingUser is not null)
@@ -42,13 +49,17 @@ public class UserService : IUserService
             return new AuthResult(false, null, "E-mail já cadastrado.");
         }
 
+        var consentTime = DateTime.UtcNow;
+
         var user = new User
         {
             Nome = request.Nome.Trim(),
             Email = normalizedEmail,
             SenhaHash = HashPassword(request.Senha),
             Papel = "user",
-            CriadoEm = DateTime.UtcNow
+            CriadoEm = consentTime,
+            ConsentimentoDados = request.ConsentimentoDados,
+            ConsentimentoRegistradoEm = consentTime
         };
 
         var created = await _userRepository.AddAsync(user, cancellationToken);

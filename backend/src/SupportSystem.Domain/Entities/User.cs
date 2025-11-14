@@ -20,4 +20,10 @@ public class User
 
     // Registro de criação do usuário em UTC.
     public DateTime CriadoEm { get; set; } = DateTime.UtcNow;
+
+    // Indica se o usuário autorizou o tratamento de dados pessoais.
+    public bool ConsentimentoDados { get; set; }
+
+    // Momento em que o consentimento foi registrado, em UTC.
+    public DateTime? ConsentimentoRegistradoEm { get; set; }
 }

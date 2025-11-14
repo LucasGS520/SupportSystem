@@ -34,4 +34,7 @@ public record class CreateTicketRequest
 
     // Feedback inicial informado pelo usuário, quando capturado junto à abertura.
     public TicketFeedbackDto? Feedback { get; init; }
+
+    // Indica se o solicitante aceitou o tratamento de dados para o chamado.
+    public bool ConsentimentoDados { get; init; }
 }

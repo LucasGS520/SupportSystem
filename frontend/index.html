@@ -951,6 +951,22 @@
                     </div>
                 </div>
             </div>
+
+            <div class="settings-card privacy-card">
+                    <h4>Privacidade e LGPD</h4>
+                    <p>Gerencie consentimento, exporte ou solicite exclusão dos seus dados.</p>
+                    <div class="toggle-row">
+                        <span>Consentimento para tratamento</span>
+                        <span class="tag info" id="privacyConsentStatus">Ativo</span>
+                    </div>
+                    <div class="privacy-actions">
+                        <button class="btn secondary" id="btnExportarDados">Exportar dados</button>
+                        <button class="btn ghost" id="btnExcluirDados">Excluir tudo</button>
+                    </div>
+                    <small class="privacy-hint">
+                        A exportação gera um relatório JSON e a exclusão remove todos os chamados vinculados.
+                    </small>
+                </div>
         </section>
 
     </main>
@@ -1002,10 +1018,22 @@
             <p class="ai-hint">
                 💡 A IA irá sugerir possíveis soluções automaticamente após o envio.
             </p>
+
+            <!-- Consentimento explícito para LGPD -->
+            <label class="consent-label">
+                <input type="checkbox" id="ticketConsent" />
+                <span>
+                    Autorizo o tratamento dos dados pessoais deste chamado conforme a Política de Privacidade
+                    e entendo que posso exportar ou excluir as informações a qualquer momento.
+                </span>
+            </label>
+            <small class="privacy-hint">
+                Os dados só serão registrados mediante consentimento e podem ser removidos pelos controles de privacidade.
+            </small>
         </div>
         <footer class="modal-footer">
             <button class="btn ghost" id="btnCancelarModal">Cancelar</button>
-            <button class="btn primary">Criar chamado</button>
+            <button class="btn primary" id="btnCriarChamado" disabled>Criar chamado</button>
         </footer>
     </div>
 </div>

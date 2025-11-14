@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Logging;
@@ -59,6 +60,14 @@ public class TicketService : ITicketService
     // Cria um ticket novo e devolve a projeção pronta para API.
     public async Task<TicketResponse> CreateAsync(CreateTicketRequest request, CancellationToken cancellationToken = default)
     {
+        if (!request.ConsentimentoDados)
+        {
+            // Rejeita a abertura porque a LGPD exige consentimento explícito antes da coleta.
+            throw new InvalidOperationException("Consentimento obrigatório para registrar o chamado.");
+        }
+
+        var consentTime = _dateTimeProvider.UtcNow;
+
         var ticket = new Ticket
         {
             Titulo = request.Titulo,
@@ -69,9 +78,11 @@ public class TicketService : ITicketService
             Categoria = request.Categoria,
             SlaTarget = request.SlaTarget,
             Solicitante = request.Solicitante,
-            AbertoEm = _dateTimeProvider.UtcNow,
+            AbertoEm = consentTime,
             SugestaoIa = request.SugestaoIa,
-            Feedback = MapToEntity(request.Feedback)
+            Feedback = MapToEntity(request.Feedback),
+            ConsentimentoDados = request.ConsentimentoDados,
+            ConsentimentoRegistradoEm = consentTime
         };
 
         var created = await _ticketRepository.AddAsync(ticket, cancellationToken);
@@ -118,6 +129,23 @@ public class TicketService : ITicketService
                 ticket.Feedback.Nota = request.Feedback.Nota;
                 ticket.Feedback.Comentario = request.Feedback.Comentario;
                 ticket.Feedback.RegistradoEm = request.Feedback.RegistradoEm;
+            }
+        }
+
+        if (request.ConsentimentoDados.HasValue)
+        {
+            ticket.ConsentimentoDados = request.ConsentimentoDados.Value;
+            ticket.ConsentimentoRegistradoEm = _dateTimeProvider.UtcNow;
+
+            if (!ticket.ConsentimentoDados)
+            {
+                // Assim que o consentimento é revogado, limpamos campos pessoais sensíveis.
+                ticket.Solicitante = null;
+
+                if (ticket.Feedback is not null)
+                {
+                    ticket.Feedback.Comentario = null;
+                }
             }
         }
 
@@ -229,6 +257,11 @@ public class TicketService : ITicketService
     // Converte a entidade em DTO pronto para uso na camada de apresentação.
     private TicketResponse MapToResponse(Ticket ticket)
     {
+        var hasConsent = ticket.ConsentimentoDados;
+
+        var safeSolicitante = hasConsent ? ticket.Solicitante : null;
+        var feedback = PrepareFeedbackForResponse(ticket.Feedback, hasConsent);
+
         return new TicketResponse
         {
             Id = ticket.Id,
@@ -239,11 +272,12 @@ public class TicketService : ITicketService
             AssignedTechnicianId = ticket.AssignedTechnicianId,
             Categoria = ticket.Categoria.ToDisplayName(),
             SlaTarget = ticket.SlaTarget,
-            Solicitante = ticket.Solicitante,
+            Solicitante = safeSolicitante,
             AbertoEm = ticket.AbertoEm,
             AbertoHa = FormatRelativeTime(ticket.AbertoEm),
             SugestaoIa = ticket.SugestaoIa,
-            Feedback = MapToDto(ticket.Feedback)
+            Feedback = feedback,
+            ConsentimentoDados = hasConsent
         };
     }
 
@@ -315,5 +349,23 @@ public class TicketService : ITicketService
             Comentario = feedback.Comentario,
             RegistradoEm = feedback.RegistradoEm
         };
+    }
+
+    // Ajusta o feedback levando em conta o consentimento do usuário.
+    private static TicketFeedbackDto? PrepareFeedbackForResponse(TicketFeedback? feedback, bool includeSensitive)
+    {
+        if (feedback is null)
+        {
+            return null;
+        }
+
+        var copy = new TicketFeedback
+        {
+            Nota = feedback.Nota,
+            Comentario = includeSensitive ? feedback.Comentario : null,
+            RegistradoEm = feedback.RegistradoEm
+        };
+
+        return MapToDto(copy);
     }
 }

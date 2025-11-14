@@ -40,4 +40,10 @@ public class Ticket
 
     // Sugestão de resolução gerada pela IA, quando existir.
     public string? SugestaoIa { get; set; }
+
+    // Indica se o solicitante autorizou o tratamento dos dados do chamado.
+    public bool ConsentimentoDados { get; set; }
+
+    // Registra quando o consentimento do ticket foi capturado, em UTC.
+    public DateTime? ConsentimentoRegistradoEm { get; set; }
 }

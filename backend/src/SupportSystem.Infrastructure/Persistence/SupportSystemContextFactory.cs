@@ -1,5 +1,8 @@
+using System;
+using System.IO;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Configuration;
 
 namespace SupportSystem.Infrastructure.Persistence;
 
@@ -10,10 +13,23 @@ public class SupportSystemContextFactory : IDesignTimeDbContextFactory<SupportSy
     public SupportSystemContext CreateDbContext(string[] args)
     {
         var optionsBuilder = new DbContextOptionsBuilder<SupportSystemContext>();
-        var connectionString =
-            "Server=(localdb)\\MSSQLLocalDB;Database=SupportSystemDb;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True";
+        var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
 
-        optionsBuilder.UseSqlServer(connectionString);
+        var configuration = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", optional: true)
+            .AddJsonFile($"appsettings.{environment}.json", optional: true)
+            .AddEnvironmentVariables()
+            .Build();
+
+        var connectionString = configuration.GetConnectionString("SupportSystem")
+            ?? configuration["Database:ConnectionString"]
+            ?? "Server=(localdb)\\MSSQLLocalDB;Database=SupportSystemDb;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True";
+
+        optionsBuilder.UseSqlServer(connectionString, sql =>
+        {
+            sql.MigrationsAssembly(typeof(SupportSystemContext).Assembly.FullName);
+        });
 
         return new SupportSystemContext(optionsBuilder.Options);
     }

@@ -4,9 +4,10 @@ using Microsoft.Extensions.DependencyInjection;
 using SupportSystem.Application.Abstractions;
 using SupportSystem.Application.Interfaces;
 using SupportSystem.Domain.Repositories;
-using SupportSystem.Infrastructure.Persistence;
 using SupportSystem.Infrastructure.Notifications;
+using SupportSystem.Infrastructure.Persistence;
 using SupportSystem.Infrastructure.Repositories;
+using SupportSystem.Infrastructure.Security;
 using SupportSystem.Infrastructure.Time;
 
 namespace SupportSystem.Infrastructure;
@@ -17,6 +18,10 @@ public static class DependencyInjection
     // Configura banco, repositórios e utilidades compartilhadas.
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
+        // Habilita o provedor de proteção de dados compartilhado entre contexto e repositórios.
+        services.AddDataProtection();
+        services.AddSingleton<ISensitiveDataProtector, DataProtectionSensitiveDataProtector>();
+        
         // Determina a string de conexão priorizando appsettings, variáveis e um fallback local.
         var connectionString = configuration.GetConnectionString("SupportSystem")
             ?? configuration["Database:ConnectionString"]
