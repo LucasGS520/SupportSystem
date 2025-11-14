@@ -48,9 +48,14 @@ public class TicketService : ITicketService
             Titulo = request.Titulo,
             Prioridade = request.Prioridade,
             Status = request.Status,
+            OwnerId = request.OwnerId,
+            AssignedTechnicianId = request.AssignedTechnicianId,
+            Categoria = request.Categoria,
+            SlaTarget = request.SlaTarget,
             Solicitante = request.Solicitante,
             AbertoEm = _dateTimeProvider.UtcNow,
-            SugestaoIa = request.SugestaoIa
+            SugestaoIa = request.SugestaoIa,
+            Feedback = MapToEntity(request.Feedback)
         };
 
         var created = await _ticketRepository.AddAsync(ticket, cancellationToken);
@@ -74,6 +79,29 @@ public class TicketService : ITicketService
         ticket.Status = request.Status ?? ticket.Status;
         ticket.Solicitante = request.Solicitante ?? ticket.Solicitante;
         ticket.SugestaoIa = request.SugestaoIa ?? ticket.SugestaoIa;
+
+        if (request.OwnerId.HasValue)
+        {
+            ticket.OwnerId = request.OwnerId.Value;
+        }
+
+        ticket.AssignedTechnicianId = request.AssignedTechnicianId ?? ticket.AssignedTechnicianId;
+        ticket.Categoria = request.Categoria ?? ticket.Categoria;
+        ticket.SlaTarget = request.SlaTarget ?? ticket.SlaTarget;
+
+        if (request.Feedback is not null)
+        {
+            if (ticket.Feedback is null)
+            {
+                ticket.Feedback = MapToEntity(request.Feedback);
+            }
+            else
+            {
+                ticket.Feedback.Nota = request.Feedback.Nota;
+                ticket.Feedback.Comentario = request.Feedback.Comentario;
+                ticket.Feedback.RegistradoEm = request.Feedback.RegistradoEm;
+            }
+        }
 
         await _ticketRepository.UpdateAsync(ticket, cancellationToken);
         _logger.LogInformation("Ticket {TicketId} atualizado", ticket.Id);
@@ -100,15 +128,22 @@ public class TicketService : ITicketService
     // Converte a entidade em DTO pronto para uso na camada de apresentação.
     private TicketResponse MapToResponse(Ticket ticket)
     {
-        return new TicketResponse(
-            ticket.Id,
-            ticket.Titulo,
-            ticket.Prioridade.ToDisplayName(),
-            ticket.Status.ToDisplayName(),
-            ticket.Solicitante,
-            ticket.AbertoEm,
-            FormatRelativeTime(ticket.AbertoEm),
-            ticket.SugestaoIa);
+        return new TicketResponse
+        {
+            Id = ticket.Id,
+            Titulo = ticket.Titulo,
+            Prioridade = ticket.Prioridade.ToDisplayName(),
+            Status = ticket.Status.ToDisplayName(),
+            OwnerId = ticket.OwnerId,
+            AssignedTechnicianId = ticket.AssignedTechnicianId,
+            Categoria = ticket.Categoria.ToDisplayName(),
+            SlaTarget = ticket.SlaTarget,
+            Solicitante = ticket.Solicitante,
+            AbertoEm = ticket.AbertoEm,
+            AbertoHa = FormatRelativeTime(ticket.AbertoEm),
+            SugestaoIa = ticket.SugestaoIa,
+            Feedback = MapToDto(ticket.Feedback)
+        };
     }
 
     // Formata o tempo decorrido desde a abertura do ticket.
@@ -147,5 +182,37 @@ public class TicketService : ITicketService
 
         var localTime = DateTime.SpecifyKind(openedAtUtc, DateTimeKind.Utc).ToLocalTime();
         return localTime.ToString("dd/MM/yyyy HH:mm");
+    }
+
+    // Converte o DTO de feedback em entidade agregada.
+    private static TicketFeedback? MapToEntity(TicketFeedbackDto? feedback)
+    {
+        if (feedback is null)
+        {
+            return null;
+        }
+
+        return new TicketFeedback
+        {
+            Nota = feedback.Nota,
+            Comentario = feedback.Comentario,
+            RegistradoEm = feedback.RegistradoEm
+        };
+    }
+
+    // Converte a entidade de feedback em DTO para transporte.
+    private static TicketFeedbackDto? MapToDto(TicketFeedback? feedback)
+    {
+        if (feedback is null)
+        {
+            return null;
+        }
+
+        return new TicketFeedbackDto
+        {
+            Nota = feedback.Nota,
+            Comentario = feedback.Comentario,
+            RegistradoEm = feedback.RegistradoEm
+        };
     }
 }

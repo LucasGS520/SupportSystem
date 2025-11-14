@@ -26,4 +26,16 @@ public static class TicketEnumExtensions
             TicketStatus.Critico => "Crítico",
             _ => status.ToString()
         };
+
+    // Converte a categoria do ticket em texto amigável para exibição.
+    public static string ToDisplayName(this TicketCategory category) =>
+        category switch
+        {
+            TicketCategory.Redes => "Infraestrutura e redes",
+            TicketCategory.SuporteAoUsuario => "Suporte ao usuário",
+            TicketCategory.Aplicacoes => "Aplicações",
+            TicketCategory.Seguranca => "Segurança da informação",
+            TicketCategory.Outros => "Outros",
+            _ => category.ToString()
+        };
 }

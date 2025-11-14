@@ -1,6 +1,6 @@
-namespace SupportSystem.Domain.Entities;
-
 using SupportSystem.Domain.Enums;
+
+namespace SupportSystem.Domain.Entities;
 
 // Representa o agregado principal de chamados dentro do domínio.
 public class Ticket
@@ -16,6 +16,18 @@ public class Ticket
 
     // Status atual do fluxo de atendimento.
     public TicketStatus Status { get; set; } = TicketStatus.Aguardando;
+
+    // Identificador do usuário que abriu o ticket.
+    public int OwnerId { get; set; }
+
+    // Identificador do técnico responsável pela tratativa, quando houver.
+    public int? AssignedTechnicianId { get; set; }
+
+    // Categoria macro utilizada para roteamento e relatórios.
+    public TicketCategory Categoria { get; set; } = TicketCategory.Outros;
+
+    // Data/hora limite em UTC para cumprimento do SLA definido.
+    public DateTime? SlaTarget { get; set; }
 
     // Pessoa ou setor que solicitou o suporte.
     public string? Solicitante { get; set; }

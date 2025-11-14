@@ -42,12 +42,26 @@ namespace SupportSystem.Infrastructure.Persistence.Migrations
                     b.Property<byte>("Prioridade")
                         .HasColumnType("tinyint");
 
+                    b.Property<byte>("Status")
+                        .HasColumnType("tinyint");
+
+                    b.Property<int>("OwnerId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("AssignedTechnicianId")
+                        .HasColumnType("int");
+
+                    b.Property<byte>("Categoria")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint")
+                        .HasDefaultValue((byte)255);
+
+                    b.Property<DateTime?>("SlaTarget")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Solicitante")
                         .HasMaxLength(120)
                         .HasColumnType("nvarchar(120)");
-
-                    b.Property<byte>("Status")
-                        .HasColumnType("tinyint");
 
                     b.Property<string>("SugestaoIa")
                         .HasMaxLength(500)
@@ -62,12 +76,34 @@ namespace SupportSystem.Infrastructure.Persistence.Migrations
 
                     b.ToTable("Tickets", (string)null);
 
+                    b.OwnsOne("SupportSystem.Domain.Entities.TicketFeedback", "Feedback", b1 =>
+                        {
+                            b1.Property<int?>("Nota")
+                                .HasColumnName("FeedbackNota")
+                                .HasColumnType("int");
+
+                            b1.Property<string>("Comentario")
+                                .HasColumnName("FeedbackComentario")
+                                .HasColumnType("nvarchar(500)")
+                                .HasMaxLength(500);
+
+                            b1.Property<DateTime?>("RegistradoEm")
+                                .HasColumnName("FeedbackRegistradoEm")
+                                .HasColumnType("datetime2");
+
+                            b1.WithOwner();
+                        });
+
                     b.HasData(
                         new
                         {
                             Id = 1,
                             AbertoEm = new DateTime(2024, 10, 10, 12, 30, 0, 0, DateTimeKind.Utc),
+                            AssignedTechnicianId = 3,
+                            Categoria = (byte)0,
+                            OwnerId = 1,
                             Prioridade = (byte)3,
+                            SlaTarget = new DateTime(2024, 10, 11, 12, 30, 0, 0, DateTimeKind.Utc),
                             Solicitante = "Maria Silva",
                             Status = (byte)2,
                             SugestaoIa = "Verificar credenciais de AD, política de acesso e status do servidor TS.",
@@ -77,7 +113,10 @@ namespace SupportSystem.Infrastructure.Persistence.Migrations
                         {
                             Id = 2,
                             AbertoEm = new DateTime(2024, 10, 9, 11, 15, 0, 0, DateTimeKind.Utc),
+                            Categoria = (byte)2,
+                            OwnerId = 2,
                             Prioridade = (byte)2,
+                            SlaTarget = new DateTime(2024, 10, 10, 17, 0, 0, 0, DateTimeKind.Utc),
                             Solicitante = "Depto RH",
                             Status = (byte)1,
                             SugestaoIa = "Conferir uso de CPU, memória do servidor e índices do banco.",
@@ -87,7 +126,11 @@ namespace SupportSystem.Infrastructure.Persistence.Migrations
                         {
                             Id = 3,
                             AbertoEm = new DateTime(2024, 10, 8, 8, 45, 0, 0, DateTimeKind.Utc),
+                            AssignedTechnicianId = 4,
+                            Categoria = (byte)3,
+                            OwnerId = 3,
                             Prioridade = (byte)3,
+                            SlaTarget = new DateTime(2024, 10, 8, 20, 45, 0, 0, DateTimeKind.Utc),
                             Solicitante = "Diretoria TI",
                             Status = (byte)4,
                             SugestaoIa = "Planejar janela de manutenção, snapshot do banco e rollback script.",
