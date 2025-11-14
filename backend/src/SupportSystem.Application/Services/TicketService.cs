@@ -17,6 +17,7 @@ public class TicketService : ITicketService
     private readonly IKnowledgeBaseRepository _knowledgeBaseRepository;
     private readonly IAIService _aiService;
     private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly INotificationService _notificationService;
     private readonly ILogger<TicketService> _logger;
 
     // Cria o serviço recebendo repositório, provedor de data e logger.
@@ -25,12 +26,14 @@ public class TicketService : ITicketService
         IKnowledgeBaseRepository knowledgeBaseRepository,
         IAIService aiService,
         IDateTimeProvider dateTimeProvider,
+        INotificationService notificationService,
         ILogger<TicketService> logger)
     {
         _ticketRepository = ticketRepository;
         _knowledgeBaseRepository = knowledgeBaseRepository;
         _aiService = aiService;
         _dateTimeProvider = dateTimeProvider;
+        _notificationService = notificationService;
         _logger = logger;
     }
 
@@ -87,6 +90,8 @@ public class TicketService : ITicketService
             return false;
         }
 
+        var statusAnterior = ticket.Status;
+
         ticket.Titulo = request.Titulo ?? ticket.Titulo;
         ticket.Prioridade = request.Prioridade ?? ticket.Prioridade;
         ticket.Status = request.Status ?? ticket.Status;
@@ -118,6 +123,13 @@ public class TicketService : ITicketService
 
         await _ticketRepository.UpdateAsync(ticket, cancellationToken);
         _logger.LogInformation("Ticket {TicketId} atualizado", ticket.Id);
+
+        var statusAlterado = request.Status.HasValue && request.Status.Value != statusAnterior;
+        if (statusAlterado)
+        {
+            // Garante o disparo imediato da notificação após persistir a mudança de status.
+            await _notificationService.NotificarMudancaStatusAsync(ticket, statusAnterior, cancellationToken);
+        }
 
         return true;
     }

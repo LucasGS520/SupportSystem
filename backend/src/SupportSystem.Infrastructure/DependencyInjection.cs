@@ -2,8 +2,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SupportSystem.Application.Abstractions;
+using SupportSystem.Application.Interfaces;
 using SupportSystem.Domain.Repositories;
 using SupportSystem.Infrastructure.Persistence;
+using SupportSystem.Infrastructure.Notifications;
 using SupportSystem.Infrastructure.Repositories;
 using SupportSystem.Infrastructure.Time;
 
@@ -35,6 +37,7 @@ public static class DependencyInjection
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IKnowledgeBaseRepository, KnowledgeBaseRepository>();
         services.AddScoped<IDateTimeProvider, SystemDateTimeProvider>();
+        services.AddScoped<INotificationService, EmailNotificationService>();
 
         return services;
     }
