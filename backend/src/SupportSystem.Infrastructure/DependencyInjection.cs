@@ -36,6 +36,7 @@ public static class DependencyInjection
         services.AddScoped<ITicketRepository, TicketRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IKnowledgeBaseRepository, KnowledgeBaseRepository>();
+        services.AddScoped<IReportRepository, ReportRepository>();
         services.AddScoped<IDateTimeProvider, SystemDateTimeProvider>();
         services.AddScoped<INotificationService, EmailNotificationService>();
 
