@@ -34,8 +34,99 @@ body {
 
 body {
     display: flex;
+    flex-direction: column;
     justify-content: center;
-    align-items: stretch;
+    align-items: center;
+    min-height: 100vh;
+    padding: 16px;
+    gap: 24px;
+}
+
+body.app-ready {
+    gap: 16px;
+    padding: 16px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* AUTENTICAÇÃO */
+.auth-wrapper {
+    width: 100%;
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.auth-card {
+    background: linear-gradient(160deg, rgba(15, 23, 42, 0.92), rgba(17, 24, 39, 0.96));
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 28px 24px;
+    box-shadow: var(--shadow-soft);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.auth-header {
+    text-align: center;
+}
+
+.auth-title {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.auth-subtitle {
+    margin: 8px 0 0;
+    color: var(--text-soft);
+    font-size: 14px;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.auth-footer {
+    text-align: center;
+    font-size: 14px;
+    color: var(--text-soft);
+}
+
+.auth-feedback {
+    min-height: 20px;
+    margin: 0;
+    font-size: 14px;
+    text-align: center;
+}
+
+.auth-feedback.error {
+    color: var(--danger);
+}
+
+.auth-feedback.success {
+    color: var(--accent);
+}
+
+.link-button {
+    border: none;
+    background: none;
+    color: var(--info);
+    cursor: pointer;
+    font: inherit;
+    text-decoration: underline;
+    padding: 0;
+}
+
+.btn.full {
+    width: 100%;
+    justify-content: center;
 }
 
 /* APP ROOT */
@@ -447,6 +538,13 @@ textarea.field {
     margin-top: 6px;
 }
 
+.empty-state {
+    text-align: center;
+    margin: 24px 0;
+    color: var(--text-soft);
+    font-size: 14px;
+}
+
 .ticket-card {
     padding: 10px 12px;
     border-radius: var(--radius-md);
@@ -475,6 +573,21 @@ textarea.field {
     margin: 0 0 6px;
     font-size: 12px;
     color: var(--text-soft);
+}
+
+.ticket-description {
+    margin: 0 0 8px;
+    font-size: 12px;
+    color: var(--text);
+}
+
+.ticket-feedback {
+    margin: 0 0 8px;
+    font-size: 12px;
+    padding: 8px 10px;
+    border-radius: var(--radius-md);
+    background: rgba(34, 197, 94, 0.15);
+    border: 1px solid rgba(34, 197, 94, 0.35);
 }
 
 .ticket-ai {

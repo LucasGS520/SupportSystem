@@ -26,6 +26,9 @@ public class Ticket
     // Categoria macro utilizada para roteamento e relatórios.
     public TicketCategory Categoria { get; set; } = TicketCategory.Outros;
 
+    // Descrição detalhada compartilhada com a equipe técnica.
+    public string? Descricao { get; set; }
+
     // Data/hora limite em UTC para cumprimento do SLA definido.
     public DateTime? SlaTarget { get; set; }
 

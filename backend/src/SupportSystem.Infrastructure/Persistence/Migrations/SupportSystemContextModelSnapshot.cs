@@ -130,6 +130,10 @@ namespace SupportSystem.Infrastructure.Persistence.Migrations
                         .HasMaxLength(120)
                         .HasColumnType("nvarchar(120)");
 
+                    b.Property<string>("Descricao")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
                     b.Property<string>("SugestaoIa")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
@@ -168,6 +172,7 @@ namespace SupportSystem.Infrastructure.Persistence.Migrations
                             AbertoEm = new DateTime(2024, 10, 10, 12, 30, 0, 0, DateTimeKind.Utc),
                             AssignedTechnicianId = 3,
                             Categoria = (byte)0,
+                            Descricao = "Usuária relata falha ao autenticar na VPN corporativa após troca de senha.",
                             OwnerId = 1,
                             Prioridade = (byte)3,
                             SlaTarget = new DateTime(2024, 10, 11, 12, 30, 0, 0, DateTimeKind.Utc),
@@ -181,6 +186,7 @@ namespace SupportSystem.Infrastructure.Persistence.Migrations
                             Id = 2,
                             AbertoEm = new DateTime(2024, 10, 9, 11, 15, 0, 0, DateTimeKind.Utc),
                             Categoria = (byte)2,
+                            Descricao = "Equipe de RH reporta demora ao calcular folha durante o fechamento do mês.",
                             OwnerId = 2,
                             Prioridade = (byte)2,
                             SlaTarget = new DateTime(2024, 10, 10, 17, 0, 0, 0, DateTimeKind.Utc),
@@ -195,6 +201,7 @@ namespace SupportSystem.Infrastructure.Persistence.Migrations
                             AbertoEm = new DateTime(2024, 10, 8, 8, 45, 0, 0, DateTimeKind.Utc),
                             AssignedTechnicianId = 4,
                             Categoria = (byte)3,
+                            Descricao = "Planejamento de atualização do ERP que envolve parada total do ambiente de produção.",
                             OwnerId = 3,
                             Prioridade = (byte)3,
                             SlaTarget = new DateTime(2024, 10, 8, 20, 45, 0, 0, DateTimeKind.Utc),

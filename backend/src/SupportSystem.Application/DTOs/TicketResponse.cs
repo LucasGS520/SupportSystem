@@ -1,5 +1,5 @@
 using System;
-using System.Coollections.Generic;
+using System.Collections.Generic;
 
 namespace SupportSystem.Application.DTOs;
 
@@ -26,6 +26,9 @@ public record class TicketResponse
 
     // Categoria do ticket em formato amigável para a interface.
     public required string Categoria { get; init; }
+
+    // Descrição detalhada visível quando existe consentimento.
+    public string? Descricao { get; init; }
 
     // Data e hora alvo do SLA, quando definida.
     public DateTime? SlaTarget { get; init; }

@@ -33,6 +33,7 @@ public class AIService : IAIService
             {
                 ticketId = ticket.Id,
                 titulo = ticket.Titulo,
+                descricao = ticket.Descricao,
                 categoria = ticket.Categoria.ToString(),
                 prioridade = ticket.Prioridade.ToString(),
                 status = ticket.Status.ToString(),

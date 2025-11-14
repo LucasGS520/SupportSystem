@@ -23,6 +23,9 @@ public record class UpdateTicketRequest
     // Categoria recalculada para melhorar relatórios.
     public TicketCategory? Categoria { get; init; }
 
+    // Descrição revisada pelo solicitante ou técnico.
+    public string? Descricao { get; init; }
+
     // Data e hora alvo do SLA após renegociação.
     public DateTime? SlaTarget { get; init; }
 

@@ -1,4 +1,6 @@
 using System;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SupportSystem.Application.DTOs;
 using SupportSystem.Application.Interfaces;
@@ -8,6 +10,7 @@ namespace SupportSystem.Api.Controllers;
 // Controlador HTTP responsável pelas operações de tickets.
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class TicketsController : ControllerBase
 {
     // Serviço de domínio que concentra as regras de ticket.
@@ -51,9 +54,23 @@ public class TicketsController : ControllerBase
         [FromBody] CreateTicketRequest request,
         CancellationToken cancellationToken)
     {
+        var userId = ResolveUserId();
+        if (userId is null)
+        {
+            return Unauthorized();
+        }
+
         try
         {
-            var created = await _ticketService.CreateAsync(request, cancellationToken);
+            var enrichedRequest = request with
+            {
+                OwnerId = userId.Value,
+                Solicitante = string.IsNullOrWhiteSpace(request.Solicitante)
+                    ? ResolveUserName()
+                    : request.Solicitante
+            };
+
+            var created = await _ticketService.CreateAsync(enrichedRequest, cancellationToken);
             return CreatedAtAction(nameof(GetTicket), new { id = created.Id }, created);
         }
         catch (InvalidOperationException ex)
@@ -84,5 +101,27 @@ public class TicketsController : ControllerBase
     {
         var deleted = await _ticketService.DeleteAsync(id, cancellationToken);
         return deleted ? NoContent() : NotFound();
+    }
+
+    // Recupera o identificador do usuário autenticado através dos claims do JWT.
+    private int? ResolveUserId()
+    {
+        var claim = User.FindFirst(ClaimTypes.NameIdentifier)
+                    ?? User.FindFirst(ClaimTypes.Sid)
+                    ?? User.FindFirst(ClaimTypes.Actor)
+                    ?? User.FindFirst("sub");
+
+        return claim is not null && int.TryParse(claim.Value, out var userId)
+            ? userId
+            : null;
+    }
+
+    // Obtém o nome amigável do usuário autenticado para uso como solicitante padrão.
+    private string? ResolveUserName()
+    {
+        return User.FindFirstValue(ClaimTypes.Name)
+            ?? User.FindFirstValue(ClaimTypes.GivenName)
+            ?? User.FindFirstValue("name")
+            ?? User.FindFirstValue(ClaimTypes.Email);
     }
 }

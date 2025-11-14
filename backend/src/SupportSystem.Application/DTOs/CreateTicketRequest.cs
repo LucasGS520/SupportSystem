@@ -15,13 +15,16 @@ public record class CreateTicketRequest
     public TicketStatus Status { get; init; } = TicketStatus.Aguardando;
 
     // Identificador do usuário autenticado que abriu o chamado.
-    public required int OwnerId { get; init; }
+    public int OwnerId { get; init; }
 
     // Identificador do técnico designado, quando já definido.
     public int? AssignedTechnicianId { get; init; }
 
     // Categoria atribuída para fins de roteamento e métricas.
     public TicketCategory Categoria { get; init; } = TicketCategory.Outros;
+
+    // Descrição detalhada do incidente registrada pelo solicitante.
+    public string? Descricao { get; init; }
 
     // Data e hora alvo para cumprimento do SLA.
     public DateTime? SlaTarget { get; init; }

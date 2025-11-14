@@ -66,6 +66,11 @@ public class TicketService : ITicketService
             throw new InvalidOperationException("Consentimento obrigatório para registrar o chamado.");
         }
 
+        if (request.OwnerId <= 0)
+        {
+            throw new InvalidOperationException("Usuário autenticado não identificado para criação do chamado.");
+        }
+
         var consentTime = _dateTimeProvider.UtcNow;
 
         var ticket = new Ticket
@@ -76,6 +81,7 @@ public class TicketService : ITicketService
             OwnerId = request.OwnerId,
             AssignedTechnicianId = request.AssignedTechnicianId,
             Categoria = request.Categoria,
+            Descricao = request.Descricao,
             SlaTarget = request.SlaTarget,
             Solicitante = request.Solicitante,
             AbertoEm = consentTime,
@@ -116,6 +122,10 @@ public class TicketService : ITicketService
 
         ticket.AssignedTechnicianId = request.AssignedTechnicianId ?? ticket.AssignedTechnicianId;
         ticket.Categoria = request.Categoria ?? ticket.Categoria;
+        if (request.Descricao is not null)
+        {
+            ticket.Descricao = request.Descricao;
+        }
         ticket.SlaTarget = request.SlaTarget ?? ticket.SlaTarget;
 
         if (request.Feedback is not null)
@@ -141,6 +151,7 @@ public class TicketService : ITicketService
             {
                 // Assim que o consentimento é revogado, limpamos campos pessoais sensíveis.
                 ticket.Solicitante = null;
+                ticket.Descricao = null;
 
                 if (ticket.Feedback is not null)
                 {
@@ -210,7 +221,7 @@ public class TicketService : ITicketService
         var suggestions = new List<TicketSuggestionDto>();
 
         var knowledgeArticles = await _knowledgeBaseRepository.BuscarRelevantesAsync(
-            ticket.Titulo,
+            string.Join(' ', new[] { ticket.Titulo, ticket.Descricao }.Where(value => !string.IsNullOrWhiteSpace(value))),
             ticket.Categoria,
             5,
             cancellationToken);
@@ -271,6 +282,7 @@ public class TicketService : ITicketService
             OwnerId = ticket.OwnerId,
             AssignedTechnicianId = ticket.AssignedTechnicianId,
             Categoria = ticket.Categoria.ToDisplayName(),
+            Descricao = hasConsent ? ticket.Descricao : null,
             SlaTarget = ticket.SlaTarget,
             Solicitante = safeSolicitante,
             AbertoEm = ticket.AbertoEm,

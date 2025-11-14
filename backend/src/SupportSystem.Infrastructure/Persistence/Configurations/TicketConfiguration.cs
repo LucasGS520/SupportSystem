@@ -42,6 +42,9 @@ public class TicketConfiguration : IEntityTypeConfiguration<Ticket>
         builder.Property(t => t.Solicitante)
             .HasMaxLength(120);
 
+        builder.Property(t => t.Descricao)
+            .HasMaxLength(2000);
+
         builder.Property(t => t.AbertoEm)
             .HasDefaultValueSql("SYSUTCDATETIME()")
             .IsRequired();
@@ -72,6 +75,7 @@ public class TicketConfiguration : IEntityTypeConfiguration<Ticket>
                 OwnerId = 1,
                 AssignedTechnicianId = 3,
                 Categoria = TicketCategory.Redes,
+                Descricao = "Usuária relata falha ao autenticar na VPN corporativa após troca de senha.",
                 SlaTarget = new DateTime(2024, 10, 11, 12, 30, 0, DateTimeKind.Utc),
                 Solicitante = "Maria Silva",
                 AbertoEm = new DateTime(2024, 10, 10, 12, 30, 0, DateTimeKind.Utc),
@@ -86,6 +90,7 @@ public class TicketConfiguration : IEntityTypeConfiguration<Ticket>
                 OwnerId = 2,
                 AssignedTechnicianId = null,
                 Categoria = TicketCategory.Aplicacoes,
+                Descricao = "Equipe de RH reporta demora ao calcular folha durante o fechamento do mês.",
                 SlaTarget = new DateTime(2024, 10, 10, 17, 0, 0, DateTimeKind.Utc),
                 Solicitante = "Depto RH",
                 AbertoEm = new DateTime(2024, 10, 9, 11, 15, 0, DateTimeKind.Utc),
@@ -100,6 +105,7 @@ public class TicketConfiguration : IEntityTypeConfiguration<Ticket>
                 OwnerId = 3,
                 AssignedTechnicianId = 4,
                 Categoria = TicketCategory.Seguranca,
+                Descricao = "Equipe de RH reporta demora ao calcular folha durante o fechamento do mês.",
                 SlaTarget = new DateTime(2024, 10, 8, 20, 45, 0, DateTimeKind.Utc),
                 Solicitante = "Diretoria TI",
                 AbertoEm = new DateTime(2024, 10, 8, 8, 45, 0, DateTimeKind.Utc),

@@ -116,6 +116,7 @@ public class TicketRepository : ITicketRepository
             Categoria = ticket.Categoria,
             SlaTarget = ticket.SlaTarget,
             Solicitante = Protect(solicitanteSeguro),
+            Descricao = Protect(ticket.ConsentimentoDados ? ticket.Descricao : null),
             AbertoEm = ticket.AbertoEm,
             Feedback = MapFeedbackToStorage(feedbackSeguro),
             SugestaoIa = ticket.SugestaoIa,
@@ -138,6 +139,7 @@ public class TicketRepository : ITicketRepository
             Categoria = entity.Categoria,
             SlaTarget = entity.SlaTarget,
             Solicitante = Unprotect(entity.Solicitante),
+            Descricao = Unprotect(entity.Descricao),
             AbertoEm = entity.AbertoEm,
             Feedback = MapFeedbackToDomain(entity.Feedback),
             SugestaoIa = entity.SugestaoIa,
@@ -148,6 +150,7 @@ public class TicketRepository : ITicketRepository
         if (!ticket.ConsentimentoDados)
         {
             ticket.Solicitante = null;
+            ticket.Descricao = null;
             if (ticket.Feedback is not null)
             {
                 ticket.Feedback.Comentario = null;

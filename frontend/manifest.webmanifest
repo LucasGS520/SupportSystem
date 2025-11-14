@@ -1,0 +1,16 @@
+{
+    "name": "SupportSystem",
+    "short_name": "SupportSystem",
+    "start_url": "./",
+    "display": "standalone",
+    "background_color": "#050816",
+    "theme_color": "#050816",
+    "description": "Central de suporte com recomendações inteligentes e controles de privacidade.",
+    "icons": [
+        {
+            "src": "ui/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        }
+    ]
+}
