@@ -3,6 +3,7 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.OpenApi.Models;
 using SupportSystem.Application;
@@ -13,6 +14,14 @@ using Microsoft.IdentityModel.Tokens;
 
 // Inicializa o builder com as configurações padrão do ASP.NET Core.
 var builder = WebApplication.CreateBuilder(args);
+
+const string CorsPolicyName = "AllowFrontendClients";
+var defaultCorsOrigins = new[]
+{
+    "http://localhost:4173",
+    "http://localhost:5173",
+    "http://127.0.0.1:4173"
+};
 
 // Configura os controladores e mantém os nomes originais das propriedades JSON.
 builder.Services
@@ -52,6 +61,27 @@ if (string.IsNullOrWhiteSpace(jwtOptions.Secret))
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.SectionName));
 
 var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Secret));
+
+var allowedOrigins = builder.Configuration
+    .GetSection("Cors:AllowedOrigins")
+    .Get<string[]>();
+
+if (allowedOrigins is null || allowedOrigins.Length == 0)
+{
+    allowedOrigins = defaultCorsOrigins;
+}
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(CorsPolicyName, policy =>
+    {
+        policy
+            .WithOrigins(allowedOrigins)
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials();
+    });
+});
 
 // Habilita autenticação JWT com validações padrão.
 builder.Services
@@ -119,6 +149,8 @@ if (Directory.Exists(frontendPath))
 
 // Habilita roteamento padrão para resolver endpoints.
 app.UseRouting();
+
+app.UseCors(CorsPolicyName);
 
 // Habilita autenticação e autorização com JWT.
 app.UseAuthentication();

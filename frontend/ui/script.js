@@ -595,8 +595,8 @@ function renderTicketsList(tickets) {
             ${descricao}
 
             <p class="ticket-meta">
-                Aberto por <strong>${t.solicitante || "Usuário"}</strong>
-                • ${t.abertoHa || "Hoje"}
+                Aberto por <strong>${ticket.solicitante || "Usuário"}</strong>
+                • ${ticket.abertoHa || "Hoje"}
             </p>
 
             <p class="ticket-meta">
